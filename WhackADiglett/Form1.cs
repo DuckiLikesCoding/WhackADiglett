@@ -21,7 +21,10 @@ namespace WhackADiglett
         int randomY = 0;
         int diglettCount = 0;
         int score = 0;
-        int speed = 1000;
+        int gameSpeed = 3000; //how long it takes in between each diglett popping up
+        int diglettUpTime = 5000; //how long diglett remains up
+        int disappearAnimSpeed = 50; //diglett disappearing after being hit speed (simulates it being whacked)
+        int appearAnimSpeed = 500; //how fast the diglett comes out of the hole
 
 
         public  Form1()
@@ -62,17 +65,16 @@ namespace WhackADiglett
                         if (pictureBox.Image != null && pictureBox.Image == Hole)
                         {
                             DiglettAnimation(pictureBox);
-                            await Task.Delay(speed);
+                            await Task.Delay(gameSpeed);
                         }
                     }
                 }
                 else
                 { 
-                    await Task.Delay(speed);
+                    await Task.Delay(gameSpeed);
                 }
             }
         }
-
         private string RandomCoordinate()
         {
             randomX = random.Next(0, 4);
@@ -82,119 +84,139 @@ namespace WhackADiglett
         }
         private async void DiglettAnimation(PictureBox imageBox)
         {
-            if (imageBox.Image == Hole)
+            if (imageBox.Tag is Timer existingTimer) //if the tag has a timer, reference this timer with existingTimer
             {
-                diglettCount++;
-                imageBox.Image = Half;
-                await Task.Delay(500);
-                imageBox.Image = Full;
-                StartDisappearanceTimer(imageBox);
+                existingTimer.Stop(); //stop timer
+                existingTimer.Dispose(); //remove timer
+                imageBox.Tag = null; //ensure it is removed
+            }
+
+            Image originalState = imageBox.Image; //store original before animating
+
+            if (imageBox.Image == Half)
+            {
+                await Task.Delay(disappearAnimSpeed);
+                if (imageBox.Image != Half) return;
+                imageBox.Image = Hole;
+                diglettCount--;
             }
 
             else if (imageBox.Image == Full)
             {
                 imageBox.Image = Half;
-                await Task.Delay(50);
+                await Task.Delay(disappearAnimSpeed);
+                if (imageBox.Image != Half) return;
                 imageBox.Image = Hole;
                 diglettCount--;
             }
-        }
 
+            else if (imageBox.Image == Hole)
+            {
+                diglettCount++;
+                imageBox.Image = Half;
+                await Task.Delay(appearAnimSpeed);
+                if (imageBox.Image != Half) return; //if during the delay image != half, stop going through with this
+                imageBox.Image = Full;
+                StartDisappearanceTimer(imageBox);
+            }
+        }
         private void StartDisappearanceTimer(PictureBox imageBox)
         {
             Timer diglettTimer = new Timer();
-            int interval = 3000;
-            diglettTimer.Interval = interval;
+            diglettTimer.Interval = diglettUpTime;
             diglettTimer.Tag = imageBox; // Associate the PictureBox with the timer
 
-            diglettTimer.Tick += (sender, e) =>
+            diglettTimer.Tick += (sender, e) => // for every time tick goes up, do the code below
             {
                 // Check if the Diglett is still visible
                 if (imageBox.Image == Full)
                 {
+                    disappearAnimSpeed = 250;
                     DiglettAnimation(imageBox);
+                    disappearAnimSpeed = 50;
                 }
 
                 // Stop and dispose of the timer
                 diglettTimer.Stop();
                 diglettTimer.Dispose();
+                imageBox.Tag = null; //clear reference to avoid memory leaks
             };
 
+            imageBox.Tag = diglettTimer; // store timer inside the picture box to be able to stop by referring to the box
             diglettTimer.Start(); // Start the timer
         }
 
         private void x0y0_Click(object sender, EventArgs e)
         {
-            if (x0y0.Image == Full) {DiglettAnimation(x0y0);}
-            
+            if (x0y0.Image == Full || x0y0.Image == Half) { DiglettAnimation(x0y0);}
         }
         private void x1y0_Click(object sender, EventArgs e)
         {
-            if (x1y0.Image == Full) { DiglettAnimation(x1y0); }
+            if (x1y0.Image == Full || x1y0.Image == Half) { DiglettAnimation(x1y0); }
         }
         private void x2y0_Click(object sender, EventArgs e)
         {
-            if (x2y0.Image == Full) { DiglettAnimation(x2y0); }
+            if (x2y0.Image == Full || x2y0.Image == Half) { DiglettAnimation(x2y0); }
         }
         private void x3y0_Click(object sender, EventArgs e)
         {
-            if (x3y0.Image == Full) { DiglettAnimation(x3y0); }
+            if (x3y0.Image == Full || x3y0.Image == Half) { DiglettAnimation(x3y0); }
         }
         private void x0y1_Click(object sender, EventArgs e)
         {
-            if (x0y1.Image == Full) { DiglettAnimation(x0y1); }
+            if (x0y1.Image == Full || x0y1.Image == Half) { DiglettAnimation(x0y1); }
 
         }
         private void x1y1_Click(object sender, EventArgs e)
         {
-            if (x1y1.Image == Full) { DiglettAnimation(x1y1); }
+            if (x1y1.Image == Full || x1y1.Image == Half) { DiglettAnimation(x1y1); }
 
         }
         private void x2y1_Click(object sender, EventArgs e)
         {
-            if (x2y1.Image == Full) { DiglettAnimation(x2y1); }
+            if (x2y1.Image == Full || x2y1.Image == Half) { DiglettAnimation(x2y1); }
 
         }
         private void x3y1_Click(object sender, EventArgs e)
         {
-            if (x3y1.Image == Full) { DiglettAnimation(x3y1); }
+            if (x3y1.Image == Full || x3y1.Image == Half) { DiglettAnimation(x3y1); }
 
         }
         private void x0y2_Click(object sender, EventArgs e)
         {
-            if (x0y2.Image == Full) { DiglettAnimation(x0y2); }
+            if (x0y2.Image == Full || x0y2.Image == Half) { DiglettAnimation(x0y2); }
         }
         private void x1y2_Click(object sender, EventArgs e)
         {
-            if (x1y2.Image == Full) { DiglettAnimation(x1y2); }
+            if (x1y2.Image == Full || x1y2.Image == Half) { DiglettAnimation(x1y2); }
         }
         private void x2y2_Click(object sender, EventArgs e)
         {
-            if (x2y2.Image == Full) { DiglettAnimation(x2y2); }
+            if (x2y2.Image == Full || x2y2.Image == Half) { DiglettAnimation(x2y2); }
         }
         private void x3y2_Click(object sender, EventArgs e)
         {
-            if (x3y2.Image == Full) { DiglettAnimation(x3y2); }
+            if (x3y2.Image == Full || x3y2.Image == Half) { DiglettAnimation(x3y2); }
 
         }
         private void x0y3_Click(object sender, EventArgs e)
         {
-            if (x0y3.Image == Full) { DiglettAnimation(x0y3); }
+            if (x0y3.Image == Full || x0y3.Image == Half) { DiglettAnimation(x0y3); }
 
         }
         private void x1y3_Click(object sender, EventArgs e)
         {
-            if (x1y3.Image == Full) { DiglettAnimation(x1y3); }
+            if (x1y3.Image == Full || x1y3.Image == Half) { DiglettAnimation(x1y3); }
 
         }
         private void x2y3_Click(object sender, EventArgs e)
         {
-            if (x2y3.Image == Full) { DiglettAnimation(x2y3); }
+            if (x2y3.Image == Full || x2y3.Image == Half) { DiglettAnimation(x2y3); }
 
         }
         private void x3y3_Click(object sender, EventArgs e)
         {
-            if (x3y3.Image == Full) { DiglettAnimation(x3y3); }
+            if (x3y3.Image == Full || x3y3.Image == Half) { DiglettAnimation(x3y3); }
 
         }
     }
